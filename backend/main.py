@@ -1,34 +1,53 @@
 from fastapi import FastAPI
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-import uvicorn
+from backend.db import engine, get_session
 from backend.models import Base
+from backend.api import user_router
+from backend.repositories import UserRepository
+import os
+from dotenv import load_dotenv
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 app = FastAPI()
-
-# Подключение к базе данных SQLite (используется асинхронный драйвер aiosqlite)
-DATABASE_URL = "sqlite+aiosqlite:///database.db"
-engine = create_async_engine(DATABASE_URL)
-new_session = async_sessionmaker(engine, expire_on_commit=False)
-
-
-async def get_session():
-    """Функция для создания сессии БД"""
-    async with new_session() as session:
-        yield session
+app.include_router(user_router)
 
 
 async def init_db():
-    """Функция инициализации БД"""
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
 
-# Вызываем init_db при запуске сервера
+async def create_default_admin():
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+
+    if not admin_email or not admin_password:
+        logger.warning("Admin credentials not set in .env file!")
+        return
+
+    async for session in get_session():
+        existing_admin = await UserRepository.get_user_by_email(session, admin_email)
+        if not existing_admin:
+            await UserRepository.create_user(
+                session, email=admin_email, password=admin_password, is_admin=True
+            )
+            logger.info("Default admin user created!")
+        else:
+            logger.info("Admin user already exists")
+
+
 @app.on_event("startup")
 async def startup():
     await init_db()
+    await create_default_admin()
 
 
 if __name__ == "__main__":
+    import uvicorn
+
     uvicorn.run("main:app", reload=True)
