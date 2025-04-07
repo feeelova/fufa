@@ -1,5 +1,6 @@
 import flet as ft
 from api.client import AuthAPI
+from frontend.views.calc_views import BudgetPage
 from views.auth_views import LoginRegisterPage, dashboard_page
 
 
@@ -20,6 +21,11 @@ def main(page: ft.Page):
 
         if e.route == "/dashboard":
             view = ft.View("/dashboard", [dashboard_page(page, auth_api)])
+        elif e.route == "/budget":
+            view = ft.View(
+                "/budget",
+                [BudgetPage(page, go_back=lambda: page.go("/dashboard")).view],
+            )
         else:
             view = ft.View("/", [LoginRegisterPage(page, auth_api).view])
 

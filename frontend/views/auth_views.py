@@ -283,17 +283,78 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         page.go("/")
         return ft.Column()
 
-    return ft.Column(
-        [
-            ft.Text(f"Добро пожаловать, {user_data.get('email', '')}!", size=24),
-            ft.ElevatedButton(
-                "Выйти",
-                on_click=lambda e: logout_click(page),
-                icon=ft.icons.LOGOUT_OUTLINED,
-            ),
-        ],
-        spacing=20,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    welcome_text = ft.Text(
+        f"Добро пожаловать, {user_data.get('email', '')}!",
+        size=22,
+        weight="bold",
+        text_align=ft.TextAlign.CENTER,
+        color=ft.colors.BLUE_900,
+    )
+
+    description = ft.Text(
+        "Что вы хотите сделать?",
+        size=16,
+        color=ft.colors.GREY_600,
+        text_align=ft.TextAlign.CENTER,
+    )
+
+    budget_button = ft.ElevatedButton(
+        "📊 Автоматическое распределение бюджета",
+        icon=ft.icons.CALCULATE_OUTLINED,
+        on_click=lambda e: page.go("/budget"),
+        width=280,
+        height=50,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            bgcolor=ft.colors.BLUE_600,
+            color=ft.colors.WHITE,
+        ),
+    )
+
+    logout_button = ft.ElevatedButton(
+        "🚪 Выйти из аккаунта",
+        icon=ft.icons.LOGOUT_OUTLINED,
+        on_click=lambda e: logout_click(page),
+        width=280,
+        height=50,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            bgcolor=ft.colors.GREY_300,
+            color=ft.colors.BLACK87,
+        ),
+    )
+
+    card = ft.Container(
+        content=ft.Column(
+            [
+                welcome_text,
+                description,
+                ft.Divider(),
+                ft.Column(
+                    [budget_button, logout_button],
+                    spacing=20,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            spacing=25,
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        padding=30,
+        bgcolor=ft.colors.WHITE,
+        border_radius=20,
+        shadow=ft.BoxShadow(
+            spread_radius=1,
+            blur_radius=12,
+            color=ft.colors.BLUE_100,
+            offset=ft.Offset(2, 4),
+        ),
+        width=350,  # Уменьшил ширину карточки
+    )
+
+    return ft.Row(
+        [card],
+        alignment=ft.MainAxisAlignment.CENTER,  # Центровка карточки по горизонтали
     )
 
 
