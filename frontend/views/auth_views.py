@@ -14,8 +14,8 @@ class LoginRegisterPage:
             "height": 45,
             "border_radius": 10,
             "border_color": ft.colors.GREY_400,
-            "focused_border_color": ft.colors.BLUE_700,
-            "cursor_color": ft.colors.BLUE_700,
+            "focused_border_color": ft.colors.TEAL_700,
+            "cursor_color": ft.colors.TEAL_700,
             "content_padding": 10,
         }
 
@@ -78,7 +78,10 @@ class LoginRegisterPage:
             gradient=ft.LinearGradient(
                 begin=ft.alignment.top_center,
                 end=ft.alignment.bottom_center,
-                colors=[ft.colors.BLUE_50, ft.colors.WHITE],
+                colors=[
+                    ft.colors.PURPLE_50,
+                    ft.colors.PINK_50,
+                ],
             ),
         )
 
@@ -86,20 +89,20 @@ class LoginRegisterPage:
         return ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Вход", size=24, weight="bold", color=ft.colors.BLUE_900),
+                    ft.Text("Вход", size=24, weight="bold", color=ft.colors.PURPLE_900),
                     self.email_login,
                     self.password_login,
                     ft.ElevatedButton(
                         "Войти",
                         **button_style,
                         color=ft.colors.WHITE,
-                        bgcolor=ft.colors.BLUE_700,
+                        bgcolor=ft.colors.TEAL_700,
                         on_click=self.login_click,
                     ),
                     ft.TextButton(
                         "Нет аккаунта? Зарегистрироваться",
                         on_click=self.switch_form,
-                        style=ft.ButtonStyle(color=ft.colors.BLUE_700),
+                        style=ft.ButtonStyle(color=ft.colors.PURPLE_700),
                     ),
                 ],
                 spacing=15,
@@ -111,7 +114,7 @@ class LoginRegisterPage:
             shadow=ft.BoxShadow(
                 spread_radius=1,
                 blur_radius=15,
-                color=ft.colors.BLUE_100,
+                color=ft.colors.PURPLE_100,
             ),
             width=400,
         )
@@ -121,7 +124,10 @@ class LoginRegisterPage:
             content=ft.Column(
                 [
                     ft.Text(
-                        "Регистрация", size=24, weight="bold", color=ft.colors.BLUE_900
+                        "Регистрация",
+                        size=24,
+                        weight="bold",
+                        color=ft.colors.PURPLE_900,
                     ),
                     self.email_register,
                     self.password_register,
@@ -129,13 +135,13 @@ class LoginRegisterPage:
                         "Зарегистрироваться",
                         **button_style,
                         color=ft.colors.WHITE,
-                        bgcolor=ft.colors.GREEN_700,
+                        bgcolor=ft.colors.PINK_700,
                         on_click=self.register_click,
                     ),
                     ft.TextButton(
                         "Уже есть аккаунт? Войти",
                         on_click=self.switch_form,
-                        style=ft.ButtonStyle(color=ft.colors.BLUE_700),
+                        style=ft.ButtonStyle(color=ft.colors.PURPLE_700),
                     ),
                 ],
                 spacing=15,
@@ -147,7 +153,7 @@ class LoginRegisterPage:
             shadow=ft.BoxShadow(
                 spread_radius=1,
                 blur_radius=15,
-                color=ft.colors.BLUE_100,
+                color=ft.colors.PURPLE_100,
             ),
             width=400,
             visible=False,
@@ -288,7 +294,7 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         size=22,
         weight="bold",
         text_align=ft.TextAlign.CENTER,
-        color=ft.colors.BLUE_900,
+        color=ft.colors.PURPLE_900,
     )
 
     description = ft.Text(
@@ -306,7 +312,7 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         height=50,
         style=ft.ButtonStyle(
             shape=ft.RoundedRectangleBorder(radius=12),
-            bgcolor=ft.colors.BLUE_600,
+            bgcolor=ft.colors.TEAL_700,
             color=ft.colors.WHITE,
         ),
     )
@@ -319,8 +325,8 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         height=50,
         style=ft.ButtonStyle(
             shape=ft.RoundedRectangleBorder(radius=12),
-            bgcolor=ft.colors.GREY_300,
-            color=ft.colors.BLACK87,
+            bgcolor=ft.colors.PURPLE_100,  # Светло-фиолетовый фон
+            color=ft.colors.PURPLE_900,
         ),
     )
 
@@ -346,7 +352,7 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         shadow=ft.BoxShadow(
             spread_radius=1,
             blur_radius=12,
-            color=ft.colors.BLUE_100,
+            color=ft.colors.PURPLE_100,
             offset=ft.Offset(2, 4),
         ),
         width=350,  # Уменьшил ширину карточки
