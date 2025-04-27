@@ -1,5 +1,6 @@
 import flet as ft
 from frontend.api.client import AuthAPI
+from frontend.api.taskapi import TaskAPI
 from frontend.utils.helpers import validate_email, show_snackbar
 
 
@@ -275,7 +276,7 @@ class LoginRegisterPage:
             show_snackbar(self.page, error_msg, "red")
 
 
-def dashboard_page(page: ft.Page, auth_api: AuthAPI):
+def dashboard_page(page: ft.Page, auth_api: AuthAPI, task_api: TaskAPI):
     token = page.client_storage.get("token")
     if not token:
         page.go("/")
@@ -287,78 +288,126 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI):
         page.go("/")
         return ft.Column()
 
-    welcome_text = ft.Text(
-        f"Добро пожаловать, {user_data.get('email', '')}!",
-        size=22,
-        weight="bold",
-        text_align=ft.TextAlign.CENTER,
-        color=ft.colors.BLUE_800,
+    pending_tasks = ft.Column(spacing=10)
+    completed_tasks = ft.Column(spacing=10)
+
+    def build_task_card(task_data):
+        task_id = task_data['id']
+        is_done = task_data['is_done']
+
+        def delete_task(e):
+            response = task_api.delete_task(token, task_id)
+            if response:
+                show_snackbar(page, "Задача удалена!", "green")
+                load_tasks()
+            else:
+                show_snackbar(page, "Ошибка удаления!", "red")
+
+        def toggle_done(e):
+            new_status = not is_done
+            response = task_api.update_task(token, task_id, new_status)
+            if response:
+                show_snackbar(page, "Статус задачи обновлен!", "green")
+                load_tasks()
+            else:
+                show_snackbar(page, "Ошибка обновления!", "red")
+
+        return ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.ListTile(
+                        title=ft.Text(task_data['title'], weight="bold"),
+                        subtitle=ft.Text(task_data['description'] or "-"),
+                    ),
+                    ft.Row([
+                        ft.IconButton(
+                            icon=ft.icons.DELETE_OUTLINE,
+                            icon_color="red",
+                            tooltip="Удалить",
+                            on_click=delete_task
+                        ),
+                        ft.Switch(
+                            value=is_done,
+                            label="Выполнено" if is_done else "Не выполнено",
+                            on_change=toggle_done
+                        )
+                    ], alignment=ft.MainAxisAlignment.END)
+                ]),
+                padding=10,
+                width=400
+            ),
+            elevation=2,
+            margin=ft.margin.symmetric(vertical=5)
+        )
+
+    def load_tasks():
+        pending_tasks.controls.clear()
+        completed_tasks.controls.clear()
+
+        tasks, status = task_api.get_tasks(token)
+        if status == 200:
+            for task in tasks:
+                card = build_task_card(task)
+                if task['is_done']:
+                    completed_tasks.controls.append(card)
+                else:
+                    pending_tasks.controls.append(card)
+
+        page.update()
+
+    def logout_click(e):
+        page.client_storage.remove("token")
+        page.go("/")
+
+    # Верхняя панель
+    header = ft.Row(
+        [
+            ft.Text(
+                f"Добро пожаловать, {user_data.get('email', '')}!",
+                size=22,
+                weight="bold",
+                color=ft.colors.BLUE_800
+            ),
+            ft.ElevatedButton(
+                "+ Новая задача",
+                icon=ft.icons.ADD,
+                on_click=lambda e: page.go("/create-task"),  # переход на страницу создания
+                style=ft.ButtonStyle(
+                    shape=ft.RoundedRectangleBorder(radius=8),
+                    padding=20
+                )
+            )
+        ],
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
     )
 
-    description = ft.Text(
-        "Что вы хотите сделать?",
-        size=16,
-        color=ft.colors.BLUE_GREY_600,
-        text_align=ft.TextAlign.CENTER,
-    )
+    content = ft.Column([
+        header,
+        ft.Divider(height=20),
+        ft.Text("Активные задачи:", size=18, weight="bold"),
+        pending_tasks,
+        ft.Divider(height=20),
+        ft.Text("Выполненные задачи:", size=18, weight="bold"),
+        completed_tasks,
+        ft.ElevatedButton(
+            "Выйти из системы",
+            icon=ft.icons.LOGOUT,
+            on_click=logout_click,
+            bgcolor=ft.colors.RED_100
+        )
+    ], spacing=20, expand=True)
 
-    budget_button = ft.ElevatedButton(
-        "📊 Автоматическое распределение бюджета",
-        icon=ft.icons.CALCULATE_OUTLINED,
-        on_click=lambda e: page.go("/budget"),
-        width=280,
-        height=50,
-        style=ft.ButtonStyle(
-            shape=ft.RoundedRectangleBorder(radius=12),
-            bgcolor=ft.colors.LIGHT_BLUE_600,
-            color=ft.colors.WHITE,
-        ),
-    )
+    load_tasks()
 
-    logout_button = ft.ElevatedButton(
-        "🚪 Выйти из аккаунта",
-        icon=ft.icons.LOGOUT_OUTLINED,
-        on_click=lambda e: logout_click(page),
-        width=280,
-        height=50,
-        style=ft.ButtonStyle(
-            shape=ft.RoundedRectangleBorder(radius=12),
-            bgcolor=ft.colors.BLUE_GREY_100,
-            color=ft.colors.BLUE_800,
-        ),
-    )
-
-    card = ft.Container(
-        content=ft.Column(
-            [
-                welcome_text,
-                description,
-                ft.Divider(),
-                ft.Column(
-                    [budget_button, logout_button],
-                    spacing=20,
-                    alignment=ft.MainAxisAlignment.CENTER,
-                ),
-            ],
-            spacing=25,
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        ),
+    return ft.Container(
+        content=content,
         padding=30,
-        bgcolor=ft.colors.WHITE,
-        border_radius=20,
-        shadow=ft.BoxShadow(
-            spread_radius=1,
-            blur_radius=12,
-            color=ft.colors.BLUE_GREY_100,
-            offset=ft.Offset(2, 4),
+        gradient=ft.LinearGradient(
+            begin=ft.alignment.top_center,
+            end=ft.alignment.bottom_center,
+            colors=[ft.colors.BLUE_50, ft.colors.LIGHT_BLUE_100]
         ),
-        width=350,
-    )
-
-    return ft.Row(
-        [card],
-        alignment=ft.MainAxisAlignment.CENTER,
+        expand=True
     )
 
 
