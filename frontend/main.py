@@ -12,7 +12,6 @@ def main(page: ft.Page):
 
     # Configure page settings
     page.title = "Мое крутое приложение"
-    page.padding = 30
     page.window_width = 400
     page.window_height = 600
     page.window_resizable = False

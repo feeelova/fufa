@@ -9,15 +9,31 @@ class LoginRegisterPage:
         self.page = page
         self.auth_api = auth_api
 
-        # Общие стили для полей ввода
+        # Цветовая схема
+        self.theme = {
+            "primary": "#2A2A2A",
+            "secondary": "#4ECDC4",
+            "accent": "#FF6B6B",
+            "background": "#F8F9FA",
+            "text": "#333333",
+            "error": "#FF5252"
+        }
+
+        # Стили полей ввода
         field_style = {
-            "width": 300,
-            "height": 45,
-            "border_radius": 10,
-            "border_color": ft.colors.BLUE_GREY_200,
-            "focused_border_color": ft.colors.LIGHT_BLUE_600,
-            "cursor_color": ft.colors.LIGHT_BLUE_600,
-            "content_padding": 10,
+            "height": 50,
+            "border_radius": 0,
+            "border_width": 0,
+            "border_color": "transparent",
+            "focused_border_width": 2,
+            "focused_border_color": self.theme["secondary"],
+            "cursor_color": self.theme["secondary"],
+            "cursor_width": 1.5,
+            "content_padding": 15,
+            "filled": True,
+            "fill_color": ft.colors.WHITE,
+            "text_size": 16,
+            "label_style": ft.TextStyle(color=self.theme["text"], size=14)
         }
 
         # Поля для входа
@@ -26,7 +42,7 @@ class LoginRegisterPage:
             keyboard_type=ft.KeyboardType.EMAIL,
             autofill_hints=[ft.AutofillHint.EMAIL],
             on_change=self.clear_login_errors,
-            **field_style,
+            **field_style
         )
 
         self.password_login = ft.TextField(
@@ -34,7 +50,7 @@ class LoginRegisterPage:
             password=True,
             autofill_hints=[ft.AutofillHint.PASSWORD],
             on_change=self.clear_login_errors,
-            **field_style,
+            **field_style
         )
 
         # Поля для регистрации
@@ -42,7 +58,7 @@ class LoginRegisterPage:
             label="Email",
             keyboard_type=ft.KeyboardType.EMAIL,
             on_change=self.clear_register_errors,
-            **field_style,
+            **field_style
         )
 
         self.password_register = ft.TextField(
@@ -50,114 +66,151 @@ class LoginRegisterPage:
             password=True,
             autofill_hints=[ft.AutofillHint.NEW_PASSWORD],
             on_change=self.clear_register_errors,
-            **field_style,
+            **field_style
         )
 
-        # Стили для кнопок
-        button_style = {
-            "height": 45,
-            "style": ft.ButtonStyle(
-                shape=ft.RoundedRectangleBorder(radius=10),
-                padding=20,
-            ),
-        }
+        # Построение интерфейса
+        self.login_form = self._build_login_form()
+        self.register_form = self._build_register_form()
 
-        # Контейнеры форм
-        self.login_container = self._build_login_form(button_style)
-        self.register_container = self._build_register_form(button_style)
-
-        # Основной контейнер с центрированием
         self.view = ft.Container(
-            content=ft.Column(
-                [self.login_container, self.register_container],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=30,
-            ),
-            alignment=ft.alignment.center,
-            expand=True,
-            padding=20,
             gradient=ft.LinearGradient(
-                begin=ft.alignment.top_center,
-                end=ft.alignment.bottom_center,
-                colors=[
-                    ft.colors.BLUE_50,
-                    ft.colors.LIGHT_BLUE_100,
-                ],
+                begin=ft.alignment.top_left,
+                end=ft.alignment.bottom_right,
+                colors=["#F8F9FA", "#E9ECEF"]
             ),
+            content=ft.Row(
+                [
+                    # Левая панель с графикой
+                    ft.Container(
+                        width=400,
+                        height=page.height,
+                        content=ft.Column(
+                            [
+                                ft.Image(
+                                    src="img.png",
+                                    width=400,
+                                    height=page.height,
+                                    fit=ft.ImageFit.COVER
+                                ),
+                                ft.Text(
+                                    "Добро пожаловать!",
+                                    size=28,
+                                    weight="bold",
+                                    color=self.theme["primary"]
+                                ),
+
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        ),
+                        bgcolor=ft.colors.WHITE,
+                        padding=0,  # Убираем все отступы
+                        margin=0,
+                    ),
+
+                    # Правая панель с формами
+                    ft.Container(
+                        expand=True,
+                        content=ft.Stack(
+                            [self.login_form, self.register_form],
+                            width=400
+                        ),
+                        padding=ft.padding.only(top=80, right=100, left=100),
+                        alignment=ft.alignment.top_center
+                    )
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.STRETCH
+            ),
+            expand=True
         )
 
-    def _build_login_form(self, button_style):
-        return ft.Container(
-            content=ft.Column(
-                [
-                    ft.Text("Вход", size=24, weight="bold", color=ft.colors.BLUE_800),
-                    self.email_login,
-                    self.password_login,
-                    ft.ElevatedButton(
-                        "Войти",
-                        **button_style,
-                        color=ft.colors.WHITE,
-                        bgcolor=ft.colors.LIGHT_BLUE_600,
-                        on_click=self.login_click,
-                    ),
-                    ft.TextButton(
-                        "Нет аккаунта? Зарегистрироваться",
-                        on_click=self.switch_form,
-                        style=ft.ButtonStyle(color=ft.colors.BLUE_600),
-                    ),
-                ],
-                spacing=15,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    def _build_login_form(self):
+        return ft.Card(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(
+                            "Вход в систему",
+                            size=24,
+                            weight="bold",
+                            color=self.theme["primary"]
+                        ),
+                        ft.Divider(height=30),
+                        self.email_login,
+                        self.password_login,
+                        ft.ElevatedButton(
+                            "Продолжить",
+                            icon=ft.icons.ARROW_FORWARD,
+                            style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8),
+                                padding=20,
+                                bgcolor=self.theme["secondary"],
+                                color=ft.colors.WHITE
+                            ),
+                            height=50,
+                            on_click=self.login_click
+                        ),
+                        ft.TextButton(
+                            "Создать новый аккаунт",
+                            on_click=self.switch_form,
+                            style=ft.ButtonStyle(
+                                color=self.theme["accent"]
+                            )
+                        )
+                    ],
+                    spacing=20
+                ),
+                padding=40,
+                width=400
             ),
-            padding=30,
-            bgcolor=ft.colors.WHITE,
-            border_radius=15,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=15,
-                color=ft.colors.BLUE_GREY_100,
-            ),
-            width=400,
+            elevation=8,
+            visible=True,
+            animate_opacity=300
         )
 
-    def _build_register_form(self, button_style):
-        return ft.Container(
-            content=ft.Column(
-                [
-                    ft.Text(
-                        "Регистрация",
-                        size=24,
-                        weight="bold",
-                        color=ft.colors.BLUE_800,
-                    ),
-                    self.email_register,
-                    self.password_register,
-                    ft.ElevatedButton(
-                        "Зарегистрироваться",
-                        **button_style,
-                        color=ft.colors.WHITE,
-                        bgcolor=ft.colors.CYAN_600,
-                        on_click=self.register_click,
-                    ),
-                    ft.TextButton(
-                        "Уже есть аккаунт? Войти",
-                        on_click=self.switch_form,
-                        style=ft.ButtonStyle(color=ft.colors.BLUE_600),
-                    ),
-                ],
-                spacing=15,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    def _build_register_form(self):
+        return ft.Card(
+            content=ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(
+                            "Регистрация",
+                            size=24,
+                            weight="bold",
+                            color=self.theme["primary"]
+                        ),
+                        ft.Divider(height=30),
+                        self.email_register,
+                        self.password_register,
+                        ft.ElevatedButton(
+                            "Создать аккаунт",
+                            icon=ft.icons.PERSON_ADD,
+                            style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=8),
+                                padding=20,
+                                bgcolor=self.theme["accent"],
+                                color=ft.colors.WHITE
+                            ),
+                            height=50,
+                            on_click=self.register_click
+                        ),
+                        ft.TextButton(
+                            "Уже есть аккаунт? Войти",
+                            on_click=self.switch_form,
+                            style=ft.ButtonStyle(
+                                color=self.theme["secondary"]
+                            )
+                        )
+                    ],
+                    spacing=20
+                ),
+                padding=40,
+                width=400
             ),
-            padding=30,
-            bgcolor=ft.colors.WHITE,
-            border_radius=15,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=15,
-                color=ft.colors.BLUE_GREY_100,
-            ),
-            width=400,
+            elevation=8,
             visible=False,
+            animate_opacity=300
         )
 
     def clear_login_errors(self, e):
@@ -171,8 +224,8 @@ class LoginRegisterPage:
         self.page.update()
 
     def switch_form(self, e):
-        self.login_container.visible = not self.login_container.visible
-        self.register_container.visible = not self.register_container.visible
+        self.login_form.visible = not self.login_form.visible
+        self.register_form.visible = not self.register_form.visible
         self.clear_fields()
         self.page.update()
 
@@ -216,9 +269,7 @@ class LoginRegisterPage:
                 "Inactive user": "Аккаунт деактивирован",
                 "Connection error": "Ошибка соединения с сервером",
             }
-            error_msg = error_messages.get(
-                error, "Неизвестная ошибка. Попробуйте снова."
-            )
+            error_msg = error_messages.get(error, "Неизвестная ошибка. Попробуйте снова.")
 
             if error == "User not found":
                 self.email_login.error_text = "Пользователь не найден"
@@ -265,9 +316,7 @@ class LoginRegisterPage:
                 "Weak password": "Слишком простой пароль",
                 "Connection error": "Ошибка соединения с сервером",
             }
-            error_msg = error_messages.get(
-                error, "Неизвестная ошибка. Попробуйте снова."
-            )
+            error_msg = error_messages.get(error, "Неизвестная ошибка. Попробуйте снова.")
 
             if error == "Email already registered":
                 self.email_register.error_text = "Email уже используется"
@@ -277,6 +326,13 @@ class LoginRegisterPage:
 
 
 def dashboard_page(page: ft.Page, auth_api: AuthAPI, task_api: TaskAPI):
+    theme = {
+        "primary": "#2A2A2A",  # основной цвет текста
+        "secondary": "#4ECDC4",  # цвет акцентов
+        "accent": "#FF6B6B",  # красный для ошибок и выделений
+        "background": "#F8F9FA"  # светлый фон
+    }
+
     token = page.client_storage.get("token")
     if not token:
         page.go("/")
@@ -312,32 +368,39 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI, task_api: TaskAPI):
             else:
                 show_snackbar(page, "Ошибка обновления!", "red")
 
-        return ft.Card(
-            content=ft.Container(
-                content=ft.Column([
-                    ft.ListTile(
-                        title=ft.Text(task_data['title'], weight="bold"),
-                        subtitle=ft.Text(task_data['description'] or "-"),
-                    ),
-                    ft.Row([
-                        ft.IconButton(
-                            icon=ft.icons.DELETE_OUTLINE,
-                            icon_color="red",
-                            tooltip="Удалить",
-                            on_click=delete_task
-                        ),
-                        ft.Switch(
-                            value=is_done,
-                            label="Выполнено" if is_done else "Не выполнено",
-                            on_change=toggle_done
-                        )
-                    ], alignment=ft.MainAxisAlignment.END)
-                ]),
-                padding=10,
-                width=400
+        return ft.Container(
+            content=ft.ListTile(
+                leading=ft.Checkbox(
+                    value=is_done,
+                    active_color=theme["secondary"],
+                    on_change=toggle_done
+                ),
+                title=ft.Text(
+                    task_data['title'],
+                    color=theme["primary"],
+                    weight="bold",
+                    selectable=True
+                ),
+                subtitle=ft.Text(
+                    task_data.get('description', '') or "Без описания",
+                    color=ft.colors.GREY_600,
+                    max_lines=2
+                ),
+                trailing=ft.IconButton(
+                    icon=ft.icons.DELETE_OUTLINE,
+                    icon_color=theme["accent"],
+                    on_click=delete_task
+                )
             ),
-            elevation=2,
-            margin=ft.margin.symmetric(vertical=5)
+            bgcolor=ft.colors.WHITE,
+            border_radius=12,
+            padding=15,
+            margin=ft.margin.symmetric(vertical=10),  # увеличены отступы
+            shadow=ft.BoxShadow(
+                spread_radius=0.5,
+                blur_radius=10,
+                color=ft.colors.with_opacity(0.1, ft.colors.BLACK)
+            )
         )
 
     def load_tasks():
@@ -355,58 +418,57 @@ def dashboard_page(page: ft.Page, auth_api: AuthAPI, task_api: TaskAPI):
 
         page.update()
 
-    def logout_click(e):
-        page.client_storage.remove("token")
-        page.go("/")
 
-    # Верхняя панель
-    header = ft.Row(
+    content = ft.Column(
         [
-            ft.Text(
-                f"Добро пожаловать, {user_data.get('email', '')}!",
-                size=22,
-                weight="bold",
-                color=ft.colors.BLUE_800
+            ft.Row(
+                [
+                    ft.Text(
+                        "Мои задачи",
+                        size=24,
+                        weight="bold",
+                        color=theme["primary"]
+                    ),
+                    ft.IconButton(
+                        icon=ft.icons.ADD,
+                        icon_color=theme["accent"],
+                        tooltip="Новая задача",
+                        on_click=lambda e: page.go("/create-task"),
+                        bgcolor=theme["secondary"],  # Цвет фона кнопки
+                        alignment=ft.alignment.center  # Центрируем кнопку внутри контейнера
+                    ),
+
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             ),
-            ft.ElevatedButton(
-                "+ Новая задача",
-                icon=ft.icons.ADD,
-                on_click=lambda e: page.go("/create-task"),  # переход на страницу создания
-                style=ft.ButtonStyle(
-                    shape=ft.RoundedRectangleBorder(radius=8),
-                    padding=20
-                )
+            ft.Divider(height=20),
+            ft.Column(
+                [
+                    ft.Text("Активные задачи:", size=18, weight="bold"),
+                    pending_tasks,
+                    ft.Divider(height=20),
+                    ft.Text("Выполненные задачи:", size=18, weight="bold"),
+                    completed_tasks
+                ],
+                spacing=15,
+                expand=True,
+                scroll=ft.ScrollMode.ADAPTIVE
             )
         ],
-        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+        spacing=20,
+        expand=True
     )
-
-    content = ft.Column([
-        header,
-        ft.Divider(height=20),
-        ft.Text("Активные задачи:", size=18, weight="bold"),
-        pending_tasks,
-        ft.Divider(height=20),
-        ft.Text("Выполненные задачи:", size=18, weight="bold"),
-        completed_tasks,
-        ft.ElevatedButton(
-            "Выйти из системы",
-            icon=ft.icons.LOGOUT,
-            on_click=logout_click,
-            bgcolor=ft.colors.RED_100
-        )
-    ], spacing=20, expand=True)
 
     load_tasks()
 
     return ft.Container(
-        content=content,
-        padding=30,
+        content=ft.Column([content]),
         gradient=ft.LinearGradient(
             begin=ft.alignment.top_center,
             end=ft.alignment.bottom_center,
-            colors=[ft.colors.BLUE_50, ft.colors.LIGHT_BLUE_100]
+            colors=[theme["background"], ft.colors.WHITE]
         ),
+        padding=30,
         expand=True
     )
 
