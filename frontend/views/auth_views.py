@@ -87,26 +87,29 @@ class LoginRegisterPage:
                         height=page.height,
                         content=ft.Column(
                             [
-                                ft.Image(
-                                    src="img.png",
-                                    width=400,
-                                    height=page.height,
-                                    fit=ft.ImageFit.COVER
+                                ft.Container(
+                                    content=ft.Image(
+                                        src="img.png",
+                                        width=400,
+                                        height=page.height,
+                                        fit=ft.ImageFit.COVER,
+                                        expand=True,
+                                    ),
+                                    alignment=ft.alignment.center,
+                                    margin=0,
+                                    padding=0,
+                                    expand=True,
                                 ),
-                                ft.Text(
-                                    "Добро пожаловать!",
-                                    size=28,
-                                    weight="bold",
-                                    color=self.theme["primary"]
-                                ),
-
                             ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                            alignment=ft.MainAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=0,
+                            expand=True,
                         ),
                         bgcolor=ft.colors.WHITE,
-                        padding=0,  # Убираем все отступы
+                        padding=0,
                         margin=0,
+                        alignment=ft.alignment.top_center,
                     ),
 
                     # Правая панель с формами
